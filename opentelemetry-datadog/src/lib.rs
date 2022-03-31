@@ -295,11 +295,13 @@ mod propagator {
         }
 
         fn extract_with_context(&self, cx: &Context, extractor: &dyn Extractor) -> Context {
-            let extracted = self
-                .extract_span_context(extractor)
-                .unwrap_or_else(|_| SpanContext::empty_context());
+            let extract_result = self.extract_span_context(extractor);
 
-            cx.with_remote_span_context(extracted)
+            if let Some(span_context) = extract_result.ok().filter(|cx| cx.is_valid()) {
+                cx.with_remote_span_context(span_context)
+            } else {
+                cx.clone()
+            }
         }
 
         fn fields(&self) -> FieldIter<'_> {
