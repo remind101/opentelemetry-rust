@@ -12,8 +12,11 @@ mod v05;
 
 // todo: we should follow the same mapping defined in https://github.com/DataDog/datadog-agent/blob/main/pkg/trace/api/otlp.go
 
-// https://github.com/DataDog/dd-trace-js/blob/c89a35f7d27beb4a60165409376e170eacb194c5/packages/dd-trace/src/constants.js#L4
+// https://github.com/DataDog/dd-trace-go/blob/f7a7c53669bf96ba90b9eb818d3de11067e768b6/ddtrace/tracer/span.go#L634
 static SAMPLING_PRIORITY_KEY: &str = "_sampling_priority_v1";
+
+// https://github.com/DataDog/dd-trace-go/blob/f7a7c53669bf96ba90b9eb818d3de11067e768b6/ddtrace/tracer/span.go#L644
+static DD_MEASURED_KEY: &str = "_dd.measured";
 
 /// Custom mapping between opentelemetry spans and datadog spans.
 ///
