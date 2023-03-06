@@ -1,5 +1,5 @@
 use crate::exporter::intern::StringInterner;
-use crate::exporter::model::SAMPLING_PRIORITY_KEY;
+use crate::exporter::model::{SAMPLING_PRIORITY_KEY, DD_MEASURED_KEY};
 use crate::exporter::{Error, ModelConfig};
 use opentelemetry::sdk::export::trace;
 use opentelemetry::sdk::export::trace::SpanData;
@@ -201,7 +201,12 @@ where
                 rmp::encode::write_u32(&mut encoded, interner.intern(key.as_str()))?;
                 rmp::encode::write_u32(&mut encoded, interner.intern(value.as_str().as_ref()))?;
             }
-            rmp::encode::write_map_len(&mut encoded, 1)?;
+
+            let dd_measured = match span.attributes.get(&Key::new(DD_MEASURED_KEY)) {
+                Some(Value::Bool(v)) => *v,
+                _ => false,
+            };
+            rmp::encode::write_map_len(&mut encoded, if dd_measured { 2 } else { 1 })?;
             rmp::encode::write_u32(&mut encoded, interner.intern(SAMPLING_PRIORITY_KEY))?;
             rmp::encode::write_f64(
                 &mut encoded,
@@ -211,6 +216,11 @@ where
                     0.0
                 },
             )?;
+            if dd_measured {
+                rmp::encode::write_u32(&mut encoded, interner.intern(DD_MEASURED_KEY))?;
+                rmp::encode::write_f64(&mut encoded, 1.0)?;
+            }
+
             rmp::encode::write_u32(&mut encoded, span_type)?;
         }
     }
