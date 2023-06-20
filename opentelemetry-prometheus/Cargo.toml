@@ -1,6 +1,6 @@
 [package]
 name = "opentelemetry-prometheus"
-version = "0.11.0"
+version = "0.12.0"
 description = "Prometheus exporter for OpenTelemetry"
 homepage = "https://github.com/open-telemetry/opentelemetry-rust"
 repository = "https://github.com/open-telemetry/opentelemetry-rust"
@@ -13,14 +13,14 @@ categories = [
 keywords = ["opentelemetry", "prometheus", "metrics", "async"]
 license = "Apache-2.0"
 edition = "2021"
-rust-version = "1.57"
+rust-version = "1.60"
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-opentelemetry = { version = "0.18", path = "../opentelemetry", default-features = false, features = ["metrics"] }
+opentelemetry = { version = "0.19", path = "../opentelemetry", default-features = false, features = ["metrics"] }
 prometheus = "0.13"
 protobuf = "2.14"
 
