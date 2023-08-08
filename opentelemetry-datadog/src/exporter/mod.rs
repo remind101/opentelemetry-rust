@@ -134,6 +134,7 @@ pub fn new_pipeline() -> DatadogPipelineBuilder {
 pub struct DatadogPipelineBuilder {
     agent_endpoint: String,
     trace_config: Option<sdk::trace::Config>,
+    batch_config: Option<sdk::trace::BatchConfig>,
     api_version: ApiVersion,
     client: Option<Arc<dyn HttpClient>>,
     mapping: Mapping,
@@ -145,6 +146,7 @@ impl Default for DatadogPipelineBuilder {
         DatadogPipelineBuilder {
             agent_endpoint: DEFAULT_AGENT_ENDPOINT.to_string(),
             trace_config: None,
+            batch_config: None,
             mapping: Mapping::empty(),
             api_version: ApiVersion::Version05,
             unified_tags: UnifiedTags::new(),
@@ -177,6 +179,7 @@ impl Debug for DatadogPipelineBuilder {
         f.debug_struct("DatadogExporter")
             .field("agent_endpoint", &self.agent_endpoint)
             .field("trace_config", &self.trace_config)
+            .field("batch_config", &self.batch_config)
             .field("client", &self.client)
             .field("resource_mapping", &mapping_debug(&self.mapping.resource))
             .field("name_mapping", &mapping_debug(&self.mapping.name))
@@ -291,10 +294,12 @@ impl DatadogPipelineBuilder {
         mut self,
         runtime: R,
     ) -> Result<sdk::trace::Tracer, TraceError> {
+        let batch_config = self.batch_config.take().unwrap_or_default();
         let (config, service_name) = self.build_config_and_service_name();
         let exporter = self.build_exporter_with_service_name(service_name)?;
         let processor = sdk::trace::BatchSpanProcessor::builder(exporter, runtime)
             .with_drop_if_not_sampled(false)
+            .with_batch_config(batch_config)
             .build();
         let provider = sdk::trace::TracerProvider::builder()
             .with_span_processor(processor)
@@ -347,6 +352,12 @@ impl DatadogPipelineBuilder {
     /// Assign the SDK trace configuration
     pub fn with_trace_config(mut self, config: sdk::trace::Config) -> Self {
         self.trace_config = Some(config);
+        self
+    }
+
+    /// Assign the batch span processor for the exporter pipeline.
+    pub fn with_batch_processor_config(mut self, config: sdk::trace::BatchConfig) -> Self {
+        self.batch_config = Some(config);
         self
     }
 
